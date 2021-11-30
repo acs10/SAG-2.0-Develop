@@ -1,0 +1,26 @@
+{
+  "name": "sag2.0",
+  "version": "1.0.0",
+  "description": "",
+  "main": "file-helpers.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/S4URCY/SAG2.0.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/S4URCY/SAG2.0/issues"
+  },
+<<<<<<< HEAD
+  "homepage": "https://github.com/S4URCY/SAG2.0#readme",
+  "dependencies": {
+    "vue-simple-alert": "^1.1.1"
+  }
+=======
+  "homepage": "https://github.com/S4URCY/SAG2.0#readme"
+>>>>>>> f2425105bbcc5bd233d6f6e7ae441aa0b2b2df7d
+}

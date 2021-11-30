@@ -1,0 +1,407 @@
+﻿<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>SAG - Sistema para Automação de Genogramas</title>
+    <meta http-equiv="Content-Language" content="pt-br">
+    <meta name="description" content="SAG - Sistema para Automação de Genogramas."/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+
+<body class="container-fluid">
+<div class="navbar"></div>
+<div class="row">
+    <div id="controles-form" class="col-md-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h4>Pessoa selecionada: <span>
+                        <input readonly class="form-control"
+                               name="paciente_nome" type="text"
+                               :value="[person_selected.nome, person_selected.sobrenome].filter((x)=>{return !!x}).join(' ')"></span>
+                    </h4>
+                </div>
+            </div>
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="paciente-tab" data-toggle="tab" href="#paciente" role="tab"
+                       aria-controls="paciente" aria-selected="true">Pessoa</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="parceiro-tab" data-toggle="tab" href="#parceiro" role="tab"
+                       aria-controls="parceiro"
+                       aria-selected="false">Relação Conjugal</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="familia-tab" data-toggle="tab" href="#familia" role="tab"
+                       aria-controls="familia"
+                       aria-selected="false">Família</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="relacionamento-tab" data-toggle="tab" href="#relacionamento" role="tab"
+                       aria-controls="relacionamento"
+                       aria-selected="false">Relacionamento</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="paciente" role="tabpanel" aria-labelledby="paciente-tab">
+                    <div class="form-group">
+                        <label>Nome da Pessoa</label>
+                        <div class="row">
+                            <div class="col">
+                                <input type="text" class="form-control"
+                                       name="nome" placeholder="Nome"
+                                       :disabled="person_selected.identificacao == null"
+                                       v-model="person_selected.nome">
+                            </div>
+                            <div class="col">
+                                <input type="text" class="form-control"
+                                       name="sobrenome" placeholder="Sobrenome"
+                                       :disabled="person_selected.identificacao == null"
+                                       v-model="person_selected.sobrenome">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Gênero</label>
+                        <select class="form-control" name="genero"
+                                :disabled="person_selected.identificacao == null"
+                                v-model="person_selected.genero">
+                            <option value="" selected>--------</option>
+                            <option value="M">Masculino</option>
+                            <option value="F">Feminino</option>
+                            <option value="H">Homossexual</option>
+                            <option value="L">Lésbica</option>
+                            <option value="BM">Bissexual (Masculino)</option>
+                            <option value="BF">Bissexual (Feminino)</option>
+                            <option value="MH">Transsexual (Masculino)</option>
+                            <option value="HM">Transsexual (Feminino)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col">
+                                <label>Data de Nascimento</label>
+                                <div class="input-group date">
+                                    <input type="date" class="form-control"
+                                           :disabled="person_selected.identificacao == null"
+                                           v-model="person_selected.data_nascimento">
+                                </div>
+                            </div>
+                            <div class="col">
+                                <label>Data de Falecimento</label>
+                                <div class="input-group date">
+                                    <input type="date" class="form-control"
+                                           :disabled="person_selected.identificacao == null"
+                                           v-model="person_selected.data_falecimento">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Patologias</label>
+                        <div class="row">
+                            <div class="col-sm-6" v-for="item in patologias">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                           :value="item[0]"
+                                           :disabled="person_selected.identificacao == null"
+                                           v-model="person_selected_patologias_sorted">
+                                    <label class="form-check-label">{{ item[1] }}</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="text-align: center">
+                        <button type="button" class="btn btn-outline-primary btn-sm"
+                                :disabled="person_selected.identificacao != null"
+                                v-on:click.prevent="btn_person_new">
+                            <i class="fa fa-plus"></i> Criar
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                :disabled="person_selected.identificacao == null"
+                                v-on:click.prevent="btn_person_delete">
+                            <i class="fa fa-times"></i> Remover
+                        </button>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="familia" role="tabpanel" aria-labelledby="familia-tab">
+                    <div class="form-group"
+                         v-show="person_selected.pais == 0">
+                        <label>Pai/Mãe</label>
+                        <div class="row">
+                            <div class="col">
+                                <select class="form-control" disabled>
+                                    <option value="">--------</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <select class="form-control" disabled>
+                                    <option value="">--------</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                        disabled><i class="fa fa-times"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group"
+                         v-for="(item, idx) in person_selected.pais">
+                        <label>Pai/Mãe</label>
+                        <div class="row">
+                            <div class="col">
+                                <select class="form-control"
+                                        v-model="item.com">
+                                    <option v-for="disponible_person in disponible_person_for_parents(item.com)"
+                                            :value="disponible_person.identificacao">{{ disponible_person.nome }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <select class="form-control"
+                                        v-model="item.categoria">
+                                    <option value="">--------</option>
+                                    <option value="pai">Pai</option>
+                                    <option value="mae">Mae</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                        :disabled="person_selected.identificacao == null"
+                                        v-on:click.prevent="person_selected.pais.pop(idx)"
+                                ><i class="fa fa-times"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="text-align: center">
+                        <button type="button" class="btn btn-outline-info btn-sm"
+                                :disabled="person_selected.identificacao == null"
+                                v-on:click.prevent="btn_family_new">
+                            <i class="fa fa-plus"></i> Criar Relacionamento Familiar
+                        </button>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="parceiro" role="tabpanel" aria-labelledby="parceiro-tab">
+                    <div class="form-group"
+                         v-show="person_selected.relacionamentos == 0">
+                        <label>Relacionamento Conjugal</label>
+                        <div class="row">
+                            <div class="col">
+                                <select class="form-control" disabled>
+                                    <option value="">--------</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <select class="form-control" disabled>
+                                    <option value="">--------</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                        disabled><i class="fa fa-times"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group"
+                         v-for="(item, idx) in person_selected.relacionamentos">
+                        <label>Relacionamento Conjugal</label>
+                        <div class="row">
+                            <div class="col">
+                                <select class="form-control"
+                                        v-model="item.com">
+                                    <option v-for="disponible_person in disponible_person_for_relationships(item.com)"
+                                            :value="disponible_person.identificacao">{{ disponible_person.nome }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <select class="form-control"
+                                        v-model="item.categoria">
+                                    <option value="">--------</option>
+                                    <option value="Marriage">Casado</option>
+                                    <option value="Separate">Separado</option>
+                                    <option value="ExMarriage">Divorciado</option>
+                                    <option value="UniaoEstavel">União Estável</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" class="btn btn-outline-danger"
+                                        :disabled="person_selected.identificacao == null"
+                                        v-on:click.prevent="person_selected.relacionamentos.pop(idx)">
+                                    <i class="fa fa-times"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="text-align: center">
+                        <button type="button" class="btn btn-outline-info btn-sm"
+                                :disabled="person_selected.identificacao == null"
+                                v-on:click.prevent="btn_relationships_new">
+                            <i class="fa fa-plus"></i> Criar Relacionamento Conjugal
+                        </button>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="relacionamento" role="tabpanel" aria-labelledby="relacionamento-tab">
+                    <div class="form-group"
+                         v-show="person_selected.relacao == 0">
+                        <label>Relacionamento Entre Familiares</label>
+                        <div class="row">
+                            <div class="col">
+                                <select class="form-control" disabled>
+                                    <option value="">--------</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <select class="form-control" disabled>
+                                    <option value="">--------</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                        disabled><i class="fa fa-times"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group"
+                         v-for="(item, idx) in person_selected.relacao">
+                        <label>Relacionamento Entre Familiares</label>
+                        <div class="row">
+                            <div class="col">
+                                <select class="form-control"
+                                        v-model="item.com">
+                                    <option v-for="disponible_person in disponible_person_for_relation(item.com)"
+                                            :value="disponible_person.identificacao">{{ disponible_person.nome }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <select class="form-control"
+                                        v-model="item.categoria">
+                                    <option value="">--------</option>
+                                    <option value="Proximo">Próximo</option>
+                                    <option value="Unido">Unido</option>
+                                    <option value="Hostil">Hostil</option>
+                                    <option value="Distante">Distante</option>
+                                    <option value="RelacaoPositiva">Relação Positiva</option>
+                                    <option value="AbusoFisico">Abuso Físico</option>
+                                    <option value="AbusoEmocional">Abuso Emocional</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" class="btn btn-outline-danger"
+                                        :disabled="person_selected.identificacao == null"
+                                        v-on:click.prevent="person_selected.relacao.pop(idx)">
+                                    <i class="fa fa-times"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="text-align: center">
+                        <button type="button" class="btn btn-outline-info btn-sm"
+                                :disabled="person_selected.identificacao == null"
+                                v-on:click.prevent="btn_relation_new">
+                            <i class="fa fa-plus"></i> Criar Relacionamento entre Familiares
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <hr class="hr"/>
+            <div class="container shadow-lg p-3 mb-5 bg-white rounded">
+                <div class="form-group" style="text-align: center">
+                    <button type="button" class="btn btn-outline-info btn-sm"
+                            v-on:click.prevent="btn_print">
+                        <i class="fa fa-print"></i> Imprimir
+                    </button>
+
+                    <button type="button" class="btn btn-outline-success btn-sm"
+                            data-toggle="modal"
+                            data-target="#salvarGenograma">
+                        <i class="fa fa-floppy-o"></i> Salvar
+                    </button>
+                </div>
+                <div class="form-group" style="text-align: center">
+                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                            data-toggle="modal"
+                            data-target="#exportarGenograma">
+                        <i class="fa fa-download"></i> Exportar Imagem
+                    </button>
+
+                    <button type="button" class="btn btn-outline-primary btn-sm"
+                            v-on:click.prevent="btn_data_load">
+                        <i class="fa fa-upload"></i> Carregar
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="salvarGenograma" tabindex="-1" role="dialog"
+             aria-labelledby="TituloModalCentralizado" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="TituloModalCentralizado">Salvar Genograma</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Dê um nome para seu Genograma:</p>
+                        <input class="form-control" name="nome_genogram" type="text" placeholder="Nome"
+                               v-model="nome_genogram">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                        <button type="button" class="btn btn-primary"
+                                v-on:click.prevent="btn_export_genogram(nome_genogram)">Salvar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Imagem -->
+        <div class="modal fade" id="exportarGenograma" tabindex="-1" role="dialog"
+             aria-labelledby="TituloModalCentralizado" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="TituloModalCentralizadoExportar">Exportar Genograma em Imagem</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Dê um nome para seu Genograma:</p>
+                        <input class="form-control" name="nome_genogram_export" type="text" placeholder="Nome"
+                               v-model="nome_genogram_export">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                        <button type="button" class="btn btn-primary"
+                                v-on:click.prevent="btn_export_img(nome_genogram_export)">Exportar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="sample" class="col-md-7">
+        <div id="myDiagramDiv" style="border: solid 1px black; width:100%; height:700px"></div>
+    </div>
+</div>
+</body>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/node-uuid/1.4.8/uuid.min.js" type="text/javascript"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/popper.js" type="text/javascript"></script>-->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.js" type="text/javascript"></script>
+<!--<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" type="text/javascript"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js" type="text/javascript"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js" type="text/javascript"></script>-->
+
+<script src="file-helpers.js" type="text/javascript"></script>
+<script src="go.js"></script>
+<script src="genogramLayout.js"></script>
+<script src="genogram-control.js"></script>
+<script src="vue/core.js" type="text/javascript"></script>
+</html>
