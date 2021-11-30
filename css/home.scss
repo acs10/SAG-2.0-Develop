@@ -1,0 +1,86 @@
+.bg-dark {
+  background-color: #3790e900 !important;
+}
+
+.top {
+  height: 100vh
+}
+
+.navbar-dark .navbar-nav .nav-link {
+  margin-right: 50px;
+  color: #323259;
+}
+
+.navbar-dark .navbar-brand {
+  color: #FD2D5F;
+  margin-left: 50px;
+  font-size: 35px;
+}
+
+.navbar-dark .navbar-brand2 {
+  color: #696666;
+  margin-left: 10px;
+  font-size: 15px;
+}
+
+.texto1 {
+  font-size: 40px;
+  font-weight: 300;
+  position: relative;
+  animation: textOut 3s ease-out 0s 1;
+}
+
+.retangle {
+  z-index: 0;
+  height: 31rem;
+  width: 28rem;
+  animation: 1s ease-out 0s 1 moveBar;
+  position: absolute;
+}
+
+
+.wave1 {
+  position: absolute;
+  top: 25rem;
+  animation: moveWave1 3s ease-in infinite alternate;
+}
+
+.wave12 {
+  top: 25rem;
+
+}
+
+.wave13 {
+  top: 25rem;
+}
+
+footer {
+  bottom: 0;
+  left: 0;
+  text-align: center;
+  margin-top: 50px;
+  color: #847f7f;
+}
+
+.jumbotron {
+  background-color: white;
+}
+
+
+//  button {
+//    background: #1ee79e;
+//    border-radius: 8px;
+//    color: #0d1926;
+//    height: 50px;
+//    font-size: 25px;
+//    transition: all 250ms ease-in-out;
+//    cursor: pointer;
+
+//    &:hover {
+//      background-color: #11BE7F;
+//    }
+
+//    &:focus {
+//      outline: none;
+//    }
+//  }
